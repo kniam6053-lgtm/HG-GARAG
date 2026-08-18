@@ -1,0 +1,400 @@
+import React, { useState, useEffect } from 'react';
+import { LogOut, Plus, Trash2, Edit, Eye, EyeOff } from 'lucide-react';
+import { signOut } from 'firebase/auth';
+import { auth, db } from '../firebase';
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import Swal from 'sweetalert2';
+
+const ThemeSwal = Swal.mixin({
+  background: '#121816',
+  color: '#e5e7eb',
+  confirmButtonColor: '#10b981',
+  cancelButtonColor: '#374151',
+  customClass: {
+    popup: 'border border-emerald-500/30 rounded-2xl shadow-2xl',
+  }
+});
+
+export default function AdminPanel({ user, onLogout }) {
+  const [bookings, setBookings] = useState([]);
+  const [parts, setParts] = useState([]);
+  const [activeTab, setActiveTab] = useState('bookings');
+  const [loading, setLoading] = useState(false);
+  const [newBooking, setNewBooking] = useState({
+    customerName: '',
+    phone: '',
+    service: '',
+    date: '',
+    time: ''
+  });
+  const [newPart, setNewPart] = useState({
+    partName: '',
+    category: '',
+    price: '',
+    stock: ''
+  });
+
+  // Load Bookings dari Firestore
+  useEffect(() => {
+    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const bookingsList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setBookings(bookingsList);
+    });
+    return unsubscribe;
+  }, []);
+
+  // Load Parts dari Firestore
+  useEffect(() => {
+    const q = query(collection(db, 'parts'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const partsList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setParts(partsList);
+    });
+    return unsubscribe;
+  }, []);
+
+  // Handle Add Booking
+  const handleAddBooking = async (e) => {
+    e.preventDefault();
+    
+    if (!newBooking.customerName || !newBooking.phone || !newBooking.service || !newBooking.date) {
+      ThemeSwal.fire('Error', 'Semua field harus diisi!', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await addDoc(collection(db, 'bookings'), {
+        ...newBooking,
+        createdAt: new Date(),
+        status: 'Pending'
+      });
+      
+      ThemeSwal.fire('Sukses!', 'Booking berhasil ditambahkan', 'success');
+      setNewBooking({ customerName: '', phone: '', service: '', date: '', time: '' });
+    } catch (error) {
+      ThemeSwal.fire('Error', 'Gagal menambahkan booking', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Add Part
+  const handleAddPart = async (e) => {
+    e.preventDefault();
+    
+    if (!newPart.partName || !newPart.category || !newPart.price || !newPart.stock) {
+      ThemeSwal.fire('Error', 'Semua field harus diisi!', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await addDoc(collection(db, 'parts'), {
+        ...newPart,
+        price: parseFloat(newPart.price),
+        stock: parseInt(newPart.stock),
+        createdAt: new Date()
+      });
+      
+      ThemeSwal.fire('Sukses!', 'Part berhasil ditambahkan', 'success');
+      setNewPart({ partName: '', category: '', price: '', stock: '' });
+    } catch (error) {
+      ThemeSwal.fire('Error', 'Gagal menambahkan part', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Delete Booking
+  const handleDeleteBooking = async (id) => {
+    ThemeSwal.fire({
+      title: 'Hapus Booking?',
+      text: 'Data tidak bisa dikembalikan',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Hapus',
+      cancelButtonText: 'Batal'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteDoc(doc(db, 'bookings', id));
+          ThemeSwal.fire('Sukses', 'Booking dihapus', 'success');
+        } catch (error) {
+          ThemeSwal.fire('Error', 'Gagal menghapus booking', 'error');
+        }
+      }
+    });
+  };
+
+  // Handle Delete Part
+  const handleDeletePart = async (id) => {
+    ThemeSwal.fire({
+      title: 'Hapus Part?',
+      text: 'Data tidak bisa dikembalikan',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Hapus',
+      cancelButtonText: 'Batal'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteDoc(doc(db, 'parts', id));
+          ThemeSwal.fire('Sukses', 'Part dihapus', 'success');
+        } catch (error) {
+          ThemeSwal.fire('Error', 'Gagal menghapus part', 'error');
+        }
+      }
+    });
+  };
+
+  // Handle Logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      ThemeSwal.fire('Logout', 'Anda berhasil logout', 'success');
+      onLogout();
+    } catch (error) {
+      ThemeSwal.fire('Error', 'Gagal logout', 'error');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      {/* Header */}
+      <div className="bg-gray-900/80 border-b border-emerald-500/30 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white">HG GARAGE Admin</h1>
+            <p className="text-gray-400 text-sm">Welcome, {user?.email?.split('@')[0] || 'Admin'}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg border border-red-500/30 transition"
+          >
+            <LogOut size={20} />
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto p-4">
+        {/* Tabs */}
+        <div className="flex gap-4 mb-8 border-b border-gray-700">
+          <button
+            onClick={() => setActiveTab('bookings')}
+            className={`pb-3 px-4 font-semibold transition ${
+              activeTab === 'bookings'
+                ? 'text-emerald-400 border-b-2 border-emerald-400'
+                : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            📅 Bookings
+          </button>
+          <button
+            onClick={() => setActiveTab('parts')}
+            className={`pb-3 px-4 font-semibold transition ${
+              activeTab === 'parts'
+                ? 'text-emerald-400 border-b-2 border-emerald-400'
+                : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            🔧 Parts
+          </button>
+        </div>
+
+        {/* Bookings Tab */}
+        {activeTab === 'bookings' && (
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Add Booking Form */}
+            <div className="lg:col-span-1">
+              <div className="bg-gray-900/50 border border-emerald-500/30 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <Plus size={20} /> Tambah Booking
+                </h3>
+                
+                <form onSubmit={handleAddBooking} className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Nama Pelanggan"
+                    value={newBooking.customerName}
+                    onChange={(e) => setNewBooking({ ...newBooking, customerName: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Nomor HP"
+                    value={newBooking.phone}
+                    onChange={(e) => setNewBooking({ ...newBooking, phone: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Jenis Service"
+                    value={newBooking.service}
+                    onChange={(e) => setNewBooking({ ...newBooking, service: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <input
+                    type="date"
+                    value={newBooking.date}
+                    onChange={(e) => setNewBooking({ ...newBooking, date: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <input
+                    type="time"
+                    value={newBooking.time}
+                    onChange={(e) => setNewBooking({ ...newBooking, time: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-semibold py-2 rounded-lg transition"
+                  >
+                    {loading ? 'Sedang menyimpan...' : 'Tambah Booking'}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Bookings List */}
+            <div className="lg:col-span-2">
+              <div className="bg-gray-900/50 border border-emerald-500/30 rounded-xl p-6 max-h-[600px] overflow-y-auto">
+                <h3 className="text-xl font-bold text-white mb-4">Daftar Booking</h3>
+                
+                {bookings.length === 0 ? (
+                  <p className="text-gray-400">Belum ada booking</p>
+                ) : (
+                  <div className="space-y-3">
+                    {bookings.map((booking) => (
+                      <div key={booking.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-emerald-500/50 transition">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="font-semibold text-white">{booking.customerName}</p>
+                            <p className="text-sm text-gray-400">{booking.phone}</p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteBooking(booking.id)}
+                            className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-300 mb-1">Service: {booking.service}</p>
+                        <p className="text-sm text-gray-300">Tanggal: {booking.date} - {booking.time || '-'}</p>
+                        <span className={`inline-block text-xs px-3 py-1 mt-2 rounded-full ${
+                          booking.status === 'Completed' 
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Parts Tab */}
+        {activeTab === 'parts' && (
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Add Part Form */}
+            <div className="lg:col-span-1">
+              <div className="bg-gray-900/50 border border-emerald-500/30 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <Plus size={20} /> Tambah Part
+                </h3>
+                
+                <form onSubmit={handleAddPart} className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="Nama Part"
+                    value={newPart.partName}
+                    onChange={(e) => setNewPart({ ...newPart, partName: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Kategori"
+                    value={newPart.category}
+                    onChange={(e) => setNewPart({ ...newPart, category: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Harga"
+                    value={newPart.price}
+                    onChange={(e) => setNewPart({ ...newPart, price: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Stock"
+                    value={newPart.stock}
+                    onChange={(e) => setNewPart({ ...newPart, stock: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-semibold py-2 rounded-lg transition"
+                  >
+                    {loading ? 'Sedang menyimpan...' : 'Tambah Part'}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Parts List */}
+            <div className="lg:col-span-2">
+              <div className="bg-gray-900/50 border border-emerald-500/30 rounded-xl p-6 max-h-[600px] overflow-y-auto">
+                <h3 className="text-xl font-bold text-white mb-4">Daftar Parts</h3>
+                
+                {parts.length === 0 ? (
+                  <p className="text-gray-400">Belum ada parts</p>
+                ) : (
+                  <div className="space-y-3">
+                    {parts.map((part) => (
+                      <div key={part.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-emerald-500/50 transition">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="font-semibold text-white">{part.partName}</p>
+                            <p className="text-sm text-gray-400">{part.category}</p>
+                          </div>
+                          <button
+                            onClick={() => handleDeletePart(part.id)}
+                            className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-emerald-400 font-semibold">Rp {part.price?.toLocaleString('id-ID') || 0}</p>
+                          <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                            Stock: {part.stock}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
