@@ -173,13 +173,8 @@ export default function App() {
     ].join('\n');
   };
 
-  // DATA SPAREPART
-  const [spareparts, setSpareparts] = useState([
-    { id: 1, name: 'Oli MPX2 800ml', price: 'Rp 55.000', category: 'Pelumas' },
-    { id: 2, name: 'Busi NGK CPR9', price: 'Rp 25.000', category: 'Kelistrikan' },
-    { id: 3, name: 'Kampas Rem Depan', price: 'Rp 60.000', category: 'Pengereman' },
-    { id: 4, name: 'Aki Dry GTZ5S', price: 'Rp 210.000', category: 'Pengapian' }
-  ]);
+  // DATA SPAREPART REALTIME DARI FIREBASE
+  const [spareparts, setSpareparts] = useState([]);
 
   // DATA BOOKING REALTIME DARI FIREBASE
   const [bookings, setBookings] = useState([]);
@@ -215,6 +210,24 @@ const [formData, setFormData] = useState({ id: null, name: '', phone: '', date: 
       setBookings(data);
     }, (error) => {
       console.error("Error fetching realtime bookings:", error);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // MENDENGARKAN SPAREPARTS REALTIME DARI FIREBASE
+  useEffect(() => {
+    const q = query(collection(db, 'parts'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().partName || doc.data().name,
+        price: `Rp ${doc.data().price?.toLocaleString('id-ID') || 0}`,
+        category: doc.data().category,
+        stock: doc.data().stock
+      }));
+      setSpareparts(data);
+    }, (error) => {
+      console.error("Error fetching realtime spareparts:", error);
     });
     return () => unsubscribe();
   }, []);
@@ -352,17 +365,14 @@ const [formData, setFormData] = useState({ id: null, name: '', phone: '', date: 
       return;
     }
 
+    // Strict role-based login
     const matchedUser = users[loginRole]?.find(
       (user) => user.username.toLowerCase() === trimmedUsername.toLowerCase() && user.password === loginPassword
     );
 
-    const isAdminFallback =
-      loginRole === 'pelanggan' &&
-      trimmedUsername.toLowerCase() === 'admin' &&
-      loginPassword === 'admin123';
-
-    if (matchedUser || isAdminFallback) {
-      setUserRole('admin');
+    if (matchedUser) {
+      // Login dengan role yang sesuai
+      setUserRole(loginRole);
       setShowLoginModal(false);
       setLoginUsername('');
       setLoginPassword('');
