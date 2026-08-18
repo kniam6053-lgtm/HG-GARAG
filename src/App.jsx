@@ -1015,6 +1015,16 @@ const [formData, setFormData] = useState({ id: null, name: '', phone: '', date: 
       </div>
     );
   }
+  {showLoginModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <AdminLogin 
+      onLoginSuccess={(user) => {
+        setShowLoginModal(false);
+      }} 
+      onClose={() => setShowLoginModal(false)} // 👈 Panggil fungsi ini saat tombol 'X' diklik
+    />
+  </div>
+)}
 
   // DASHBOARD UTAMA BENGKEL
   return (

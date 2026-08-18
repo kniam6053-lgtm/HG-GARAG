@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, EyeOff, Eye } from 'lucide-react';
+import { Lock, EyeOff, Eye, X } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import Swal from 'sweetalert2';
@@ -14,7 +14,7 @@ const ThemeSwal = Swal.mixin({
   }
 });
 
-export default function AdminLogin({ onLoginSuccess }) {
+export default function AdminLogin({ onLoginSuccess, onClose }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -60,9 +60,21 @@ export default function AdminLogin({ onLoginSuccess }) {
 
   return (
     <div className="min-h-screen bg-[#080c14] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
+      <div className="w-full max-w-sm relative">
+        <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm relative">
           
+          {/* ❌ TOMBOL SILANG UNTUK KELUAR */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              type="button"
+              className="absolute top-4 right-4 text-cyan-400/60 hover:text-cyan-300 hover:bg-cyan-500/10 p-1.5 rounded-full transition"
+              aria-label="Tutup"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+
           {/* Header */}
           <div className="flex items-center justify-center mb-6 pt-1">
             <div className="w-16 h-16 rounded-full bg-[#0a2332] border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_25px_rgba(34,211,238,0.5)]">
@@ -77,7 +89,7 @@ export default function AdminLogin({ onLoginSuccess }) {
             Admin Portal Masuk
           </p>
 
-          {/* Form Login (Tanpa Opsi Register) */}
+          {/* Form Login */}
           <form onSubmit={handleLogin} className="space-y-4">
             
             {/* Username */}
