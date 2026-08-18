@@ -5,12 +5,12 @@ import { auth } from '../firebase';
 import Swal from 'sweetalert2';
 
 const ThemeSwal = Swal.mixin({
-  background: '#121816',
+  background: '#0b141d',
   color: '#e5e7eb',
-  confirmButtonColor: '#10b981',
+  confirmButtonColor: '#06b6d4',
   cancelButtonColor: '#374151',
   customClass: {
-    popup: 'border border-emerald-500/30 rounded-2xl shadow-2xl',
+    popup: 'border border-cyan-500/40 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.2)]',
   }
 });
 
@@ -115,29 +115,29 @@ export default function AdminLogin({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#080c14] flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
         {/* Card Login */}
-        <div className="bg-gray-900/50 border border-emerald-500/30 rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
+        <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
           {/* Header */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="bg-emerald-500/10 p-3 rounded-full border border-emerald-500/30">
-              <Lock className="w-6 h-6 text-emerald-400" />
+          <div className="flex items-center justify-center mb-6 pt-1">
+            <div className="w-16 h-16 rounded-full bg-[#0a2332] border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_25px_rgba(34,211,238,0.5)]">
+              <Lock className="w-8 h-8 text-cyan-300" />
             </div>
           </div>
           
-          <h1 className="text-3xl font-bold text-white text-center mb-2">
+          <h1 className="text-2xl font-bold text-cyan-300 text-center mb-1 tracking-wide">
             HG GARAGE
           </h1>
-          <p className="text-gray-400 text-center mb-8">
+          <p className="text-cyan-200/70 text-center mb-6 text-[11px] italic font-medium">
             {isRegistering ? 'Buat Akun Admin Baru' : 'Admin Portal Masuk'}
           </p>
 
           {/* Form */}
           <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-4">
             {/* Username */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+            <div className="space-y-2">
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-cyan-200/70">
                 Username Admin
               </label>
               <input
@@ -145,7 +145,7 @@ export default function AdminLogin({ onLoginSuccess }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 placeholder="admin_bengkel"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none transition"
+                className="w-full px-3 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/50 text-xs focus:border-cyan-400 focus:outline-none transition"
               />
               {isRegistering && (
                 <p className="text-xs text-gray-400 mt-1">💡 Username hanya huruf, angka, underscore</p>
@@ -153,61 +153,71 @@ export default function AdminLogin({ onLoginSuccess }) {
             </div>
 
             {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+            <div className="space-y-2">
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-cyan-200/70">
                 Password
               </label>
-              <div className="relative">
+              <div className="relative flex items-center">
+                <Lock className="absolute left-3.5 w-4 h-4 text-cyan-400/70 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none transition"
+                  placeholder="Masukkan password"
+                  className="w-full bg-[#0d1d2b] border border-cyan-500/40 rounded-xl pl-10 pr-10 py-3 text-xs text-cyan-100 placeholder-cyan-400/50 outline-none focus:border-cyan-400 transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-200"
+                  className="absolute right-3.5 text-cyan-400/70 hover:text-cyan-300 transition"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff className="w-4 h-4 text-cyan-400" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Submit Button */}
+            <div className="text-[10px] text-cyan-200/70 bg-[#081b26] border border-cyan-500/20 rounded-lg px-3 py-2">
+              {isRegistering ? 'Password minimal 6 karakter' : 'Credential: admin / admin123'}
+            </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-6 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition"
+              className="w-full py-3 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-black font-extrabold text-xs tracking-wider rounded-xl transition uppercase shadow-[0_0_15px_rgba(34,211,238,0.4)]"
             >
-              <LogIn size={20} />
-              {loading ? 'Sedang memproses...' : isRegistering ? 'Buat Akun' : 'Login'}
+              {loading ? 'Sedang memproses...' : isRegistering ? 'BUAT AKUN' : 'MASUK'}
             </button>
+
+            {!isRegistering && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(true);
+                  setUsername('');
+                  setPassword('');
+                  setShowPassword(false);
+                }}
+                className="w-full py-2.5 border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/15 text-cyan-300 font-bold text-[10px] tracking-wider rounded-xl transition uppercase"
+              >
+                BELUM PUNYA AKUN? DAFTAR
+              </button>
+            )}
+
+            {isRegistering && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(false);
+                  setUsername('');
+                  setPassword('');
+                  setShowPassword(false);
+                }}
+                className="w-full py-2.5 border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/15 text-cyan-300 font-bold text-[10px] tracking-wider rounded-xl transition uppercase"
+              >
+                SUDAH PUNYA AKUN? LOGIN
+              </button>
+            )}
           </form>
-
-          {/* Toggle Register/Login */}
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => {
-                setIsRegistering(!isRegistering);
-                setUsername('');
-                setPassword('');
-              }}
-              className="text-emerald-400 hover:text-emerald-300 text-sm font-medium transition"
-            >
-              {isRegistering 
-                ? 'Sudah punya akun? Login di sini' 
-                : 'Belum punya akun? Daftar di sini'}
-            </button>
-          </div>
-
-          {/* Security Note */}
-          <div className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
-            <p className="text-xs text-emerald-400 text-center">
-              🔒 Password Anda terenkripsi dan aman di Firebase. Username tidak pernah ter-expose.
-            </p>
-          </div>
         </div>
       </div>
     </div>

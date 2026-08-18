@@ -6,12 +6,12 @@ import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from '
 import Swal from 'sweetalert2';
 
 const ThemeSwal = Swal.mixin({
-  background: '#121816',
+  background: '#0b141d',
   color: '#e5e7eb',
-  confirmButtonColor: '#10b981',
+  confirmButtonColor: '#06b6d4',
   cancelButtonColor: '#374151',
   customClass: {
-    popup: 'border border-emerald-500/30 rounded-2xl shadow-2xl',
+    popup: 'border border-cyan-500/40 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.2)]',
   }
 });
 
@@ -167,13 +167,13 @@ export default function AdminPanel({ user, onLogout }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="min-h-screen bg-[#080c14]">
       {/* Header */}
-      <div className="bg-gray-900/80 border-b border-emerald-500/30 backdrop-blur-sm sticky top-0 z-50">
+      <div className="bg-[#0b141d]/80 border-b border-cyan-500/30 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-white">HG GARAGE Admin</h1>
-            <p className="text-gray-400 text-sm">Welcome, {user?.email?.split('@')[0] || 'Admin'}</p>
+            <h1 className="text-3xl font-bold text-cyan-300 tracking-wide">HG GARAGE Admin</h1>
+            <p className="text-cyan-200/70 text-sm">Welcome, {user?.email?.split('@')[0] || 'Admin'}</p>
           </div>
           <button
             onClick={handleLogout}
@@ -188,13 +188,13 @@ export default function AdminPanel({ user, onLogout }) {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-4">
         {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-gray-700">
+        <div className="flex gap-4 mb-8 border-b border-cyan-500/20">
           <button
             onClick={() => setActiveTab('bookings')}
             className={`pb-3 px-4 font-semibold transition ${
               activeTab === 'bookings'
-                ? 'text-emerald-400 border-b-2 border-emerald-400'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'text-cyan-300 border-b-2 border-cyan-400'
+                : 'text-cyan-200/50 hover:text-cyan-200'
             }`}
           >
             📅 Bookings
@@ -203,8 +203,8 @@ export default function AdminPanel({ user, onLogout }) {
             onClick={() => setActiveTab('parts')}
             className={`pb-3 px-4 font-semibold transition ${
               activeTab === 'parts'
-                ? 'text-emerald-400 border-b-2 border-emerald-400'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'text-cyan-300 border-b-2 border-cyan-400'
+                : 'text-cyan-200/50 hover:text-cyan-200'
             }`}
           >
             🔧 Parts
@@ -216,8 +216,8 @@ export default function AdminPanel({ user, onLogout }) {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Add Booking Form */}
             <div className="lg:col-span-1">
-              <div className="bg-gray-900/50 border border-emerald-500/30 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <div className="bg-[#0b141d]/60 border border-cyan-500/40 rounded-xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.1)]">
+                <h3 className="text-xl font-bold text-cyan-300 mb-4 flex items-center gap-2 tracking-wide">
                   <Plus size={20} /> Tambah Booking
                 </h3>
                 
@@ -227,38 +227,38 @@ export default function AdminPanel({ user, onLogout }) {
                     placeholder="Nama Pelanggan"
                     value={newBooking.customerName}
                     onChange={(e) => setNewBooking({ ...newBooking, customerName: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 placeholder-cyan-400/50 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <input
                     type="tel"
                     placeholder="Nomor HP"
                     value={newBooking.phone}
                     onChange={(e) => setNewBooking({ ...newBooking, phone: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 placeholder-cyan-400/50 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <input
                     type="text"
                     placeholder="Jenis Service"
                     value={newBooking.service}
                     onChange={(e) => setNewBooking({ ...newBooking, service: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 placeholder-cyan-400/50 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <input
                     type="date"
                     value={newBooking.date}
                     onChange={(e) => setNewBooking({ ...newBooking, date: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <input
                     type="time"
                     value={newBooking.time}
                     onChange={(e) => setNewBooking({ ...newBooking, time: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-semibold py-2 rounded-lg transition"
+                    className="w-full bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-black font-bold py-2 rounded-lg transition text-sm"
                   >
                     {loading ? 'Sedang menyimpan...' : 'Tambah Booking'}
                   </button>
@@ -268,19 +268,19 @@ export default function AdminPanel({ user, onLogout }) {
 
             {/* Bookings List */}
             <div className="lg:col-span-2">
-              <div className="bg-gray-900/50 border border-emerald-500/30 rounded-xl p-6 max-h-[600px] overflow-y-auto">
-                <h3 className="text-xl font-bold text-white mb-4">Daftar Booking</h3>
+              <div className="bg-[#0b141d]/60 border border-cyan-500/40 rounded-xl p-6 max-h-[600px] overflow-y-auto shadow-[0_0_30px_rgba(6,182,212,0.1)]">
+                <h3 className="text-xl font-bold text-cyan-300 mb-4 tracking-wide">Daftar Booking</h3>
                 
                 {bookings.length === 0 ? (
-                  <p className="text-gray-400">Belum ada booking</p>
+                  <p className="text-cyan-200/50">Belum ada booking</p>
                 ) : (
                   <div className="space-y-3">
                     {bookings.map((booking) => (
-                      <div key={booking.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-emerald-500/50 transition">
+                      <div key={booking.id} className="bg-[#0d1d2b] p-4 rounded-lg border border-cyan-500/20 hover:border-cyan-500/50 transition">
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <p className="font-semibold text-white">{booking.customerName}</p>
-                            <p className="text-sm text-gray-400">{booking.phone}</p>
+                            <p className="font-semibold text-cyan-100">{booking.customerName}</p>
+                            <p className="text-sm text-cyan-200/60">{booking.phone}</p>
                           </div>
                           <button
                             onClick={() => handleDeleteBooking(booking.id)}
@@ -289,8 +289,8 @@ export default function AdminPanel({ user, onLogout }) {
                             <Trash2 size={18} />
                           </button>
                         </div>
-                        <p className="text-sm text-gray-300 mb-1">Service: {booking.service}</p>
-                        <p className="text-sm text-gray-300">Tanggal: {booking.date} - {booking.time || '-'}</p>
+                        <p className="text-sm text-cyan-200 mb-1">Service: {booking.service}</p>
+                        <p className="text-sm text-cyan-200">Tanggal: {booking.date} - {booking.time || '-'}</p>
                         <span className={`inline-block text-xs px-3 py-1 mt-2 rounded-full ${
                           booking.status === 'Completed' 
                             ? 'bg-green-500/20 text-green-400'
@@ -312,8 +312,8 @@ export default function AdminPanel({ user, onLogout }) {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Add Part Form */}
             <div className="lg:col-span-1">
-              <div className="bg-gray-900/50 border border-emerald-500/30 rounded-xl p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <div className="bg-[#0b141d]/60 border border-cyan-500/40 rounded-xl p-6 shadow-[0_0_30px_rgba(6,182,212,0.1)]">
+                <h3 className="text-xl font-bold text-cyan-300 mb-4 flex items-center gap-2 tracking-wide">
                   <Plus size={20} /> Tambah Part
                 </h3>
                 
@@ -323,33 +323,33 @@ export default function AdminPanel({ user, onLogout }) {
                     placeholder="Nama Part"
                     value={newPart.partName}
                     onChange={(e) => setNewPart({ ...newPart, partName: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 placeholder-cyan-400/50 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <input
                     type="text"
                     placeholder="Kategori"
                     value={newPart.category}
                     onChange={(e) => setNewPart({ ...newPart, category: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 placeholder-cyan-400/50 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <input
                     type="number"
                     placeholder="Harga"
                     value={newPart.price}
                     onChange={(e) => setNewPart({ ...newPart, price: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 placeholder-cyan-400/50 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <input
                     type="number"
                     placeholder="Stock"
                     value={newPart.stock}
                     onChange={(e) => setNewPart({ ...newPart, stock: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#0d1d2b] border border-cyan-500/40 rounded-lg text-cyan-100 placeholder-cyan-400/50 text-sm focus:border-cyan-400 focus:outline-none transition"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-semibold py-2 rounded-lg transition"
+                    className="w-full bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-black font-bold py-2 rounded-lg transition text-sm"
                   >
                     {loading ? 'Sedang menyimpan...' : 'Tambah Part'}
                   </button>
@@ -359,19 +359,19 @@ export default function AdminPanel({ user, onLogout }) {
 
             {/* Parts List */}
             <div className="lg:col-span-2">
-              <div className="bg-gray-900/50 border border-emerald-500/30 rounded-xl p-6 max-h-[600px] overflow-y-auto">
-                <h3 className="text-xl font-bold text-white mb-4">Daftar Parts</h3>
+              <div className="bg-[#0b141d]/60 border border-cyan-500/40 rounded-xl p-6 max-h-[600px] overflow-y-auto shadow-[0_0_30px_rgba(6,182,212,0.1)]">
+                <h3 className="text-xl font-bold text-cyan-300 mb-4 tracking-wide">Daftar Parts</h3>
                 
                 {parts.length === 0 ? (
-                  <p className="text-gray-400">Belum ada parts</p>
+                  <p className="text-cyan-200/50">Belum ada parts</p>
                 ) : (
                   <div className="space-y-3">
                     {parts.map((part) => (
-                      <div key={part.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-emerald-500/50 transition">
+                      <div key={part.id} className="bg-[#0d1d2b] p-4 rounded-lg border border-cyan-500/20 hover:border-cyan-500/50 transition">
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <p className="font-semibold text-white">{part.partName}</p>
-                            <p className="text-sm text-gray-400">{part.category}</p>
+                            <p className="font-semibold text-cyan-100">{part.partName}</p>
+                            <p className="text-sm text-cyan-200/60">{part.category}</p>
                           </div>
                           <button
                             onClick={() => handleDeletePart(part.id)}
@@ -381,7 +381,7 @@ export default function AdminPanel({ user, onLogout }) {
                           </button>
                         </div>
                         <div className="flex justify-between items-center">
-                          <p className="text-sm text-emerald-400 font-semibold">Rp {part.price?.toLocaleString('id-ID') || 0}</p>
+                          <p className="text-sm text-cyan-300 font-semibold">Rp {part.price?.toLocaleString('id-ID') || 0}</p>
                           <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
                             Stock: {part.stock}
                           </span>
