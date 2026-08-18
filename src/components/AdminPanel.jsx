@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, Plus, Trash2, Edit, Eye, EyeOff, Calendar, Wrench } from 'lucide-react';
+import { LogOut, Plus, Trash2, X, Calendar, Wrench } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
@@ -19,6 +19,7 @@ export default function AdminPanel({ user, onLogout }) {
   const [bookings, setBookings] = useState([]);
   const [parts, setParts] = useState([]);
   const [activeTab, setActiveTab] = useState('bookings');
+  const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [newBooking, setNewBooking] = useState({
     customerName: '',
@@ -33,6 +34,32 @@ export default function AdminPanel({ user, onLogout }) {
     price: '',
     stock: ''
   });
+
+  // Load Bookings dari Firestore
+  useEffect(() => {
+    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const bookingsList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setBookings(bookingsList);
+    });
+    return unsubscribe;
+  }, []);
+
+  // Load Parts dari Firestore
+  useEffect(() => {
+    const q = query(collection(db, 'parts'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const partsList = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setParts(partsList);
+    });
+    return unsubscribe;
+  }, []);
 
   // Load Bookings dari Firestore
   useEffect(() => {
@@ -79,6 +106,7 @@ export default function AdminPanel({ user, onLogout }) {
       
       ThemeSwal.fire('Sukses!', 'Booking berhasil ditambahkan', 'success');
       setNewBooking({ customerName: '', phone: '', service: '', date: '', time: '' });
+      setShowAddForm(false);
     } catch (error) {
       ThemeSwal.fire('Error', 'Gagal menambahkan booking', 'error');
     } finally {
@@ -106,6 +134,7 @@ export default function AdminPanel({ user, onLogout }) {
       
       ThemeSwal.fire('Sukses!', 'Part berhasil ditambahkan', 'success');
       setNewPart({ partName: '', category: '', price: '', stock: '' });
+      setShowAddForm(false);
     } catch (error) {
       ThemeSwal.fire('Error', 'Gagal menambahkan part', 'error');
     } finally {
@@ -168,310 +197,361 @@ export default function AdminPanel({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-[#080c14]">
-      {/* Header */}
-      <div className="bg-[#0b141d]/80 border-b border-cyan-500/30 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+      {/* HEADER */}
+      <div className="bg-[#0b141d]/80 border-b border-cyan-500/30 backdrop-blur-sm sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-4 py-6 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-cyan-300 tracking-wide">HG GARAGE Admin</h1>
+            <h1 className="text-2xl font-bold text-cyan-300 tracking-wide">HG GARAGE Admin</h1>
             <p className="text-cyan-200/70 text-sm">Welcome, {user?.email?.split('@')[0] || 'Admin'}</p>
           </div>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg border border-red-500/30 transition"
           >
-            <LogOut size={20} />
+            <LogOut size={18} />
             Logout
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4">
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-cyan-500/20">
+      {/* TAB NAVIGATION */}
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="rounded-3xl border-2 border-cyan-500/30 bg-[#0b141d] p-3 shadow-xl flex gap-2">
           <button
-            onClick={() => setActiveTab('bookings')}
-            className={`pb-3 px-4 font-semibold transition ${
+            onClick={() => {
+              setActiveTab('bookings');
+              setShowAddForm(false);
+            }}
+            className={`flex-1 group flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-3 text-center transition-all duration-200 ${
               activeTab === 'bookings'
-                ? 'text-cyan-300 border-b-2 border-cyan-400'
-                : 'text-cyan-200/50 hover:text-cyan-200'
+                ? 'border-cyan-400 bg-cyan-500/10'
+                : 'border-cyan-500/30 bg-transparent hover:border-cyan-400/60'
             }`}
           >
-            📅 Bookings
+            <Calendar className="w-5 h-5" style={{ color: activeTab === 'bookings' ? '#06b6d4' : '#6ee7b7' }} />
+            <span className={`text-xs font-bold tracking-wider ${activeTab === 'bookings' ? 'text-cyan-300' : 'text-cyan-400/60 group-hover:text-cyan-400'}`}>
+              BOOKINGS
+            </span>
           </button>
+
           <button
-            onClick={() => setActiveTab('parts')}
-            className={`pb-3 px-4 font-semibold transition ${
+            onClick={() => {
+              setActiveTab('parts');
+              setShowAddForm(false);
+            }}
+            className={`flex-1 group flex flex-col items-center justify-center gap-2 rounded-2xl border-2 p-3 text-center transition-all duration-200 ${
               activeTab === 'parts'
-                ? 'text-cyan-300 border-b-2 border-cyan-400'
-                : 'text-cyan-200/50 hover:text-cyan-200'
+                ? 'border-cyan-400 bg-cyan-500/10'
+                : 'border-cyan-500/30 bg-transparent hover:border-cyan-400/60'
             }`}
           >
-            🔧 Parts
+            <Wrench className="w-5 h-5" style={{ color: activeTab === 'parts' ? '#06b6d4' : '#6ee7b7' }} />
+            <span className={`text-xs font-bold tracking-wider ${activeTab === 'parts' ? 'text-cyan-300' : 'text-cyan-400/60 group-hover:text-cyan-400'}`}>
+              PARTS
+            </span>
           </button>
         </div>
+      </div>
 
-        {/* Bookings Tab */}
+      {/* MAIN CONTENT */}
+      <div className="max-w-5xl mx-auto px-4 pb-12">
         {activeTab === 'bookings' && (
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Add Booking Form */}
-            <div className="lg:col-span-1">
-              <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
-                <h3 className="text-xl font-bold text-cyan-300 mb-6 flex items-center gap-3 tracking-wide">
-                  <div className="p-2 bg-cyan-500/10 rounded-lg">
-                    <Plus size={18} className="text-cyan-400" />
+          <div className="space-y-6">
+            {/* ADD BOOKING FORM SECTION */}
+            <div className="p-6 rounded-3xl border-2 space-y-6 bg-[#0b141d]" style={{ borderColor: '#06b6d4' }}>
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-3 border-b-2 pb-4" style={{ borderColor: '#1a1a1e' }}>
+                <div className="flex items-start gap-3.5">
+                  <div className="p-3 rounded-xl border-2 flex items-center justify-center bg-[#1a1a1e]" style={{ borderColor: '#06b6d4' }}>
+                    <Plus className="w-6 h-6" style={{ color: '#06b6d4' }} />
                   </div>
-                  Tambah Booking
-                </h3>
-                
-                <form onSubmit={handleAddBooking} className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Nama Pelanggan</label>
-                    <input
-                      type="text"
-                      placeholder="Masukkan nama pelanggan"
-                      value={newBooking.customerName}
-                      onChange={(e) => setNewBooking({ ...newBooking, customerName: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/40 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
+                  <div>
+                    <h3 className="text-xl font-extrabold text-white tracking-tight text-left">Manajemen Booking Online</h3>
+                    <p className="text-xs text-cyan-200/70 mt-0.5 text-left">Tambahkan booking baru untuk pelanggan.</p>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Nomor HP</label>
-                    <input
-                      type="tel"
-                      placeholder="Contoh: 081234567890"
-                      value={newBooking.phone}
-                      onChange={(e) => setNewBooking({ ...newBooking, phone: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/40 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Jenis Service</label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: Tune Up, Oli, Ganti Rem"
-                      value={newBooking.service}
-                      onChange={(e) => setNewBooking({ ...newBooking, service: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/40 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Tanggal Service</label>
-                    <input
-                      type="date"
-                      value={newBooking.date}
-                      onChange={(e) => setNewBooking({ ...newBooking, date: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Jam Service</label>
-                    <input
-                      type="time"
-                      value={newBooking.time}
-                      onChange={(e) => setNewBooking({ ...newBooking, time: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 mt-6 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-black font-extrabold text-xs tracking-wider rounded-xl transition uppercase shadow-[0_0_15px_rgba(34,211,238,0.4)]"
-                  >
-                    {loading ? 'Sedang menyimpan...' : '+ Tambah Booking'}
-                  </button>
-                </form>
+                </div>
               </div>
+
+              {!showAddForm ? (
+                <button 
+                  onClick={() => setShowAddForm(true)} 
+                  className="flex items-center gap-2 font-black text-xs text-black px-5 py-2.5 rounded-xl transition shadow-lg hover:brightness-110 w-full sm:w-auto"
+                  style={{ backgroundColor: '#06b6d4' }}
+                >
+                  <Plus className="w-4 h-4" /> Booking Baru
+                </button>
+              ) : (
+                <form onSubmit={handleAddBooking} className="p-5 rounded-2xl border-2 space-y-4 bg-[#0b141d]" style={{ borderColor: '#06b6d4' }}>
+                  <div className="flex items-center justify-between border-b-2 border-cyan-500/20 pb-3 gap-3">
+                    <h4 className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-left" style={{ color: '#06b6d4' }}>
+                      <Wrench className="w-4 h-4" /> Form Booking Servis Baru
+                    </h4>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAddForm(false)} 
+                      className="text-cyan-400/60 hover:text-cyan-300 transition p-1 bg-cyan-500/10 rounded-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-cyan-200/70 mb-1">Nama Pelanggan</label>
+                      <input
+                        type="text"
+                        placeholder="Masukkan nama pelanggan"
+                        value={newBooking.customerName}
+                        onChange={(e) => setNewBooking({ ...newBooking, customerName: e.target.value })}
+                        className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-cyan-200/70 mb-1">Nomor HP</label>
+                      <input
+                        type="tel"
+                        placeholder="Contoh: 081234567890"
+                        value={newBooking.phone}
+                        onChange={(e) => setNewBooking({ ...newBooking, phone: e.target.value })}
+                        className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-cyan-200/70 mb-1">Layanan yang Dibutuhkan</label>
+                      <textarea
+                        rows="3"
+                        placeholder="Tuliskan masalah motor atau layanan yang dibutuhkan..."
+                        value={newBooking.service}
+                        onChange={(e) => setNewBooking({ ...newBooking, service: e.target.value })}
+                        className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm text-cyan-200/70 mb-1">Tanggal Service</label>
+                        <input
+                          type="date"
+                          value={newBooking.date}
+                          onChange={(e) => setNewBooking({ ...newBooking, date: e.target.value })}
+                          className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-cyan-200/70 mb-1">Jam Service</label>
+                        <input
+                          type="time"
+                          value={newBooking.time}
+                          onChange={(e) => setNewBooking({ ...newBooking, time: e.target.value })}
+                          className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAddForm(false)} 
+                      className="px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 font-bold text-xs rounded-xl transition border border-cyan-500/30"
+                    >
+                      Batal
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={loading}
+                      className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 text-black font-bold text-xs rounded-xl transition shadow-lg disabled:opacity-50"
+                    >
+                      {loading ? 'Sedang menyimpan...' : 'Simpan Booking'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
 
-            {/* Bookings List */}
-            <div className="lg:col-span-2">
-              <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-8 max-h-[800px] overflow-y-auto shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
-                <h3 className="text-xl font-bold text-cyan-300 mb-6 tracking-wide">📋 Daftar Booking</h3>
-                
-                {bookings.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="text-6xl mb-4">📭</div>
-                    <p className="text-cyan-200/60 text-lg font-semibold">Belum ada booking</p>
-                    <p className="text-cyan-200/40 text-sm mt-2">Booking akan tampil di sini setelah pelanggan melakukan pemesanan</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {bookings.map((booking) => (
-                      <div key={booking.id} className="bg-gradient-to-br from-[#0d1d2b] to-[#0a1820] p-6 rounded-xl border border-cyan-500/30 hover:border-cyan-500/80 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] transition duration-200 group">
-                        <div className="flex justify-between items-start gap-4 mb-4">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-cyan-100 text-lg truncate">{booking.customerName}</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="text-cyan-400/60 text-xs">📞</span>
-                              <p className="text-cyan-300/80 text-sm font-mono">{booking.phone}</p>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleDeleteBooking(booking.id)}
-                            className="p-2.5 hover:bg-red-500/25 text-red-400/60 hover:text-red-300 rounded-lg transition flex-shrink-0"
-                            title="Hapus booking"
-                          >
-                            <Trash2 size={20} />
-                          </button>
-                        </div>
-                        
-                        <div className="space-y-3 py-4 border-y border-cyan-500/10">
-                          <div className="flex items-start gap-3">
-                            <Wrench size={16} className="text-cyan-400/70 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-cyan-200/60 uppercase tracking-wide">Service</p>
-                              <p className="text-cyan-100 font-semibold">{booking.service}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-start gap-3">
-                            <Calendar size={16} className="text-cyan-400/70 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-cyan-200/60 uppercase tracking-wide">Jadwal</p>
-                              <p className="text-cyan-100 font-semibold">{booking.date} {booking.time && `- ${booking.time}`}</p>
-                            </div>
-                          </div>
-                        </div>
+            {/* BOOKINGS LIST */}
+            <div className="p-6 rounded-3xl border-2 space-y-4 bg-[#0b141d]" style={{ borderColor: '#06b6d4' }}>
+              <h3 className="text-xl font-extrabold text-white tracking-tight">Daftar Booking</h3>
 
-                        <div className="mt-4 flex items-center justify-between">
-                          <span className={`inline-block text-xs px-4 py-2 rounded-full font-bold tracking-wide ${
-                            booking.status === 'Completed' 
-                              ? 'bg-green-500/30 text-green-300 border border-green-500/40'
-                              : 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/40'
-                          }`}>
-                            {booking.status === 'Completed' ? '✓ SELESAI' : '⏳ PENDING'}
+              {bookings.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-xs text-cyan-200/50">Belum ada antrean booking.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {bookings.map((b) => (
+                    <div 
+                      key={b.id} 
+                      className="p-4 rounded-2xl border-2 bg-[#0d1d2b] border-cyan-500/30 flex justify-between items-start cursor-pointer hover:border-cyan-400 transition"
+                    >
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-cyan-100">{b.customerName}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">
+                            {b.status || 'Pending'}
                           </span>
-                          <span className="text-xs text-cyan-400/50 font-mono">ID: {booking.id.slice(0, 8)}</span>
                         </div>
+                        <p className="text-xs text-cyan-200/70">📱 {b.phone}</p>
+                        <p className="text-xs text-cyan-200/70">🔧 {b.service}</p>
+                        <p className="text-xs text-cyan-200/70">📅 {b.date} {b.time && `- ${b.time}`}</p>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <button
+                        onClick={() => handleDeleteBooking(b.id)}
+                        className="p-2 hover:bg-red-500/20 text-red-400/70 hover:text-red-300 rounded-lg transition ml-2"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Parts Tab */}
         {activeTab === 'parts' && (
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Add Part Form */}
-            <div className="lg:col-span-1">
-              <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
-                <h3 className="text-xl font-bold text-cyan-300 mb-6 flex items-center gap-3 tracking-wide">
-                  <div className="p-2 bg-cyan-500/10 rounded-lg">
-                    <Plus size={18} className="text-cyan-400" />
+          <div className="space-y-6">
+            {/* ADD PART FORM SECTION */}
+            <div className="p-6 rounded-3xl border-2 space-y-6 bg-[#0b141d]" style={{ borderColor: '#06b6d4' }}>
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-3 border-b-2 pb-4" style={{ borderColor: '#1a1a1e' }}>
+                <div className="flex items-start gap-3.5">
+                  <div className="p-3 rounded-xl border-2 flex items-center justify-center bg-[#1a1a1e]" style={{ borderColor: '#06b6d4' }}>
+                    <Plus className="w-6 h-6" style={{ color: '#06b6d4' }} />
                   </div>
-                  Tambah Part
-                </h3>
-                
-                <form onSubmit={handleAddPart} className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Nama Part</label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: Oli, Busi, Kampas Rem"
-                      value={newPart.partName}
-                      onChange={(e) => setNewPart({ ...newPart, partName: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/40 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
+                  <div>
+                    <h3 className="text-xl font-extrabold text-white tracking-tight text-left">Manajemen Parts & Sparepart</h3>
+                    <p className="text-xs text-cyan-200/70 mt-0.5 text-left">Kelola katalog sparepart bengkel.</p>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Kategori</label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: Pelumas, Kelistrikan"
-                      value={newPart.category}
-                      onChange={(e) => setNewPart({ ...newPart, category: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/40 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Harga (Rp)</label>
-                    <input
-                      type="number"
-                      placeholder="Contoh: 50000"
-                      value={newPart.price}
-                      onChange={(e) => setNewPart({ ...newPart, price: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/40 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-cyan-200/70">Stock</label>
-                    <input
-                      type="number"
-                      placeholder="Jumlah stok"
-                      value={newPart.stock}
-                      onChange={(e) => setNewPart({ ...newPart, stock: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/40 text-sm focus:border-cyan-400 focus:outline-none transition"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 mt-6 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-black font-extrabold text-xs tracking-wider rounded-xl transition uppercase shadow-[0_0_15px_rgba(34,211,238,0.4)]"
-                  >
-                    {loading ? 'Sedang menyimpan...' : '+ Tambah Part'}
-                  </button>
-                </form>
+                </div>
               </div>
+
+              {!showAddForm ? (
+                <button 
+                  onClick={() => setShowAddForm(true)} 
+                  className="flex items-center gap-2 font-black text-xs text-black px-5 py-2.5 rounded-xl transition shadow-lg hover:brightness-110 w-full sm:w-auto"
+                  style={{ backgroundColor: '#06b6d4' }}
+                >
+                  <Plus className="w-4 h-4" /> Part Baru
+                </button>
+              ) : (
+                <form onSubmit={handleAddPart} className="p-5 rounded-2xl border-2 space-y-4 bg-[#0b141d]" style={{ borderColor: '#06b6d4' }}>
+                  <div className="flex items-center justify-between border-b-2 border-cyan-500/20 pb-3 gap-3">
+                    <h4 className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-left" style={{ color: '#06b6d4' }}>
+                      <Wrench className="w-4 h-4" /> Form Tambah Part Baru
+                    </h4>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAddForm(false)} 
+                      className="text-cyan-400/60 hover:text-cyan-300 transition p-1 bg-cyan-500/10 rounded-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-cyan-200/70 mb-1">Nama Part</label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Oli, Busi, Kampas Rem"
+                        value={newPart.partName}
+                        onChange={(e) => setNewPart({ ...newPart, partName: e.target.value })}
+                        className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-cyan-200/70 mb-1">Kategori</label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Pelumas, Kelistrikan"
+                        value={newPart.category}
+                        onChange={(e) => setNewPart({ ...newPart, category: e.target.value })}
+                        className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm text-cyan-200/70 mb-1">Harga (Rp)</label>
+                        <input
+                          type="number"
+                          placeholder="Contoh: 50000"
+                          value={newPart.price}
+                          onChange={(e) => setNewPart({ ...newPart, price: e.target.value })}
+                          className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-cyan-200/70 mb-1">Stock</label>
+                        <input
+                          type="number"
+                          placeholder="Jumlah stok"
+                          value={newPart.stock}
+                          onChange={(e) => setNewPart({ ...newPart, stock: e.target.value })}
+                          className="w-full bg-[#0d1d2b] border-2 border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs text-cyan-100 outline-none focus:border-cyan-300 transition"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAddForm(false)} 
+                      className="px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 font-bold text-xs rounded-xl transition border border-cyan-500/30"
+                    >
+                      Batal
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={loading}
+                      className="px-5 py-2.5 bg-cyan-400 hover:bg-cyan-300 text-black font-bold text-xs rounded-xl transition shadow-lg disabled:opacity-50"
+                    >
+                      {loading ? 'Sedang menyimpan...' : 'Simpan Part'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
 
-            {/* Parts List */}
-            <div className="lg:col-span-2">
-              <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-8 max-h-[800px] overflow-y-auto shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
-                <h3 className="text-xl font-bold text-cyan-300 mb-6 tracking-wide">🔧 Daftar Parts</h3>
-                
-                {parts.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="text-6xl mb-4">📦</div>
-                    <p className="text-cyan-200/60 text-lg font-semibold">Belum ada parts</p>
-                    <p className="text-cyan-200/40 text-sm mt-2">Tambahkan part untuk menampilkan katalog sparepart</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {parts.map((part) => (
-                      <div key={part.id} className="bg-gradient-to-br from-[#0d1d2b] to-[#0a1820] p-6 rounded-xl border border-cyan-500/30 hover:border-cyan-500/80 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] transition duration-200 group">
-                        <div className="flex justify-between items-start gap-4 mb-4">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-cyan-100 text-lg truncate">{part.partName}</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="text-cyan-400/60 text-xs">📂</span>
-                              <p className="text-cyan-300/80 text-sm">{part.category}</p>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleDeletePart(part.id)}
-                            className="p-2.5 hover:bg-red-500/25 text-red-400/60 hover:text-red-300 rounded-lg transition flex-shrink-0"
-                            title="Hapus part"
-                          >
-                            <Trash2 size={20} />
-                          </button>
-                        </div>
+            {/* PARTS LIST */}
+            <div className="p-6 rounded-3xl border-2 space-y-4 bg-[#0b141d]" style={{ borderColor: '#06b6d4' }}>
+              <h3 className="text-xl font-extrabold text-white tracking-tight">Daftar Parts</h3>
 
-                        <div className="grid grid-cols-2 gap-4 py-4 border-y border-cyan-500/10">
-                          <div>
-                            <p className="text-xs text-cyan-200/60 uppercase tracking-wide mb-1">Harga</p>
-                            <p className="text-xl font-bold text-cyan-300">Rp {part.price?.toLocaleString('id-ID') || 0}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-cyan-200/60 uppercase tracking-wide mb-1">Stok</p>
-                            <p className="text-xl font-bold text-cyan-300">{part.stock} unit</p>
-                          </div>
-                        </div>
-
-                        <div className="mt-4">
-                          <span className="inline-block text-xs px-4 py-2 rounded-full bg-blue-500/30 text-blue-300 border border-blue-500/40 font-bold tracking-wide">
-                            ✓ TERSEDIA
+              {parts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-xs text-cyan-200/50">Belum ada parts.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {parts.map((part) => (
+                    <div 
+                      key={part.id} 
+                      className="p-4 rounded-2xl border-2 bg-[#0d1d2b] border-cyan-500/30 flex justify-between items-start cursor-pointer hover:border-cyan-400 transition"
+                    >
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-cyan-100">{part.partName}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">
+                            Tersedia
                           </span>
-                          <span className="ml-2 text-xs text-cyan-400/50 font-mono">ID: {part.id.slice(0, 8)}</span>
                         </div>
+                        <p className="text-xs text-cyan-200/70">📂 {part.category}</p>
+                        <p className="text-xs text-cyan-300 font-bold">💰 Rp {part.price?.toLocaleString('id-ID') || 0}</p>
+                        <p className="text-xs text-cyan-200/70">📊 Stock: {part.stock} unit</p>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <button
+                        onClick={() => handleDeletePart(part.id)}
+                        className="p-2 hover:bg-red-500/20 text-red-400/70 hover:text-red-300 rounded-lg transition ml-2"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
