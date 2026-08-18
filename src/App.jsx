@@ -775,103 +775,112 @@ const [formData, setFormData] = useState({ id: null, name: '', phone: '', date: 
             </button>
           </div>
         </div>
-{/* MODAL LOGIN ADMIN */}
-{showLoginModal && (
-  <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div className="bg-[#0b141d]/95 border border-cyan-500/40 w-full max-w-sm rounded-2xl p-6 sm:p-8 relative shadow-[0_0_50px_rgba(6,182,212,0.2)] text-center space-y-6">
-      
-      {/* ❌ Tombol Silang Keluar */}
-      <button 
-        onClick={() => { 
-          setShowLoginModal(false); 
-          setShowLoginPassword(false); 
-          setLoginUsername(''); 
-          setLoginPassword(''); 
-          setLoginError(''); 
-        }} 
-        className="absolute right-4 top-4 text-cyan-400/60 hover:text-cyan-300 hover:bg-cyan-500/10 p-1.5 rounded-full transition"
-        aria-label="Tutup"
-      >
-        <X className="w-5 h-5" />
-      </button>
+              {/* ❌ TOMBOL SILANG UNTUK KELUAR */}
+<button
+  onClick={onClose ? onClose : () => window.location.href = '/'}
+  type="button"
+  className="absolute top-4 right-4 text-cyan-400/70 hover:text-cyan-300 hover:bg-cyan-500/10 p-2 rounded-full transition z-10 cursor-pointer"
+  aria-label="Tutup"
+>
+  <X className="w-5 h-5" />
+</button>
+        {/* MODAL LOGIN (USERNAME + PASSWORD) */}
+        {showLoginModal && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-[#0b141d]/95 border border-cyan-500/40 w-full max-w-sm rounded-2xl p-6 sm:p-8 relative shadow-[0_0_50px_rgba(6,182,212,0.2)] text-center space-y-6">
+              <button 
+                onClick={() => { setShowLoginModal(false); setShowLoginPassword(false); setLoginUsername(''); setLoginPassword(''); setLoginError(''); }} 
+                className="absolute right-4 top-4 text-cyan-400/60 hover:text-cyan-300 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="flex justify-center pt-1">
+                <div className="w-16 h-16 rounded-full bg-[#0a2332] border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_25px_rgba(34,211,238,0.5)]">
+                  <Lock className="w-8 h-8 text-cyan-300" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold text-cyan-300 tracking-wide">
+                  {loginRole === 'admin' ? 'Login Admin' : 'Login Pengunjung'}
+                </h3>
+                <p className="text-[11px] text-cyan-200/70 italic font-medium">
+                  Masukkan username dan password untuk melanjutkan
+                </p>
+              </div>
+              <form onSubmit={handleLoginSubmit} className="space-y-4 text-left">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-semibold uppercase tracking-wide text-cyan-200/70">Username</label>
+                  <div className="relative flex items-center">
+                    <UserCheck className="absolute left-3.5 w-4 h-4 text-cyan-400/70 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder={loginRole === 'admin' ? 'Masukkan username admin' : 'Masukkan username pengunjung'}
+                      value={loginUsername}
+                      onChange={(e) => setLoginUsername(e.target.value)}
+                      className="w-full bg-[#0d1d2b] border border-cyan-500/40 rounded-xl pl-10 py-3 text-xs text-cyan-100 placeholder-cyan-400/50 outline-none focus:border-cyan-400 transition"
+                      autoFocus
+                    />
+                  </div>
+                </div>
 
-      {/* Header Icon */}
-      <div className="flex justify-center pt-1">
-        <div className="w-16 h-16 rounded-full bg-[#0a2332] border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_25px_rgba(34,211,238,0.5)]">
-          <Lock className="w-8 h-8 text-cyan-300" />
-        </div>
-      </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-semibold uppercase tracking-wide text-cyan-200/70">Password</label>
+                  <div className="relative flex items-center">
+                    <Lock className="absolute left-3.5 w-4 h-4 text-cyan-400/70 pointer-events-none" />
+                    <input
+                      type={showLoginPassword ? 'text' : 'password'}
+                      placeholder={loginRole === 'admin' ? 'Masukkan password admin' : 'Masukkan password pengunjung'}
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      className="w-full bg-[#0d1d2b] border border-cyan-500/40 rounded-xl pl-10 pr-10 py-3 text-xs text-cyan-100 placeholder-cyan-400/50 outline-none focus:border-cyan-400 transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-3.5 text-cyan-400/70 hover:text-cyan-300 transition"
+                    >
+                      {showLoginPassword ? <EyeOff className="w-4 h-4 text-cyan-400" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
 
-      {/* Judul Modal */}
-      <div className="space-y-1">
-        <h3 className="text-xl font-bold text-cyan-300 tracking-wide">
-          HG GARAGE
-        </h3>
-        <p className="text-[11px] text-cyan-200/70 italic font-medium">
-          Admin Portal Masuk
-        </p>
-      </div>
+                <div className="text-[10px] text-cyan-200/70 bg-[#081b26] border border-cyan-500/20 rounded-lg px-3 py-2">
+                  {loginRole === 'admin'
+                    ? 'Credential: admin / admin123'
+                    : 'Credential: pengunjung / pengunjung123'}
+                </div>
 
-      {/* Form Login */}
-      <form onSubmit={handleLoginSubmit} className="space-y-4 text-left">
-        
-        {/* Username */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-semibold uppercase tracking-wide text-cyan-200/70">
-            Username Admin
-          </label>
-          <div className="relative flex items-center">
-            <UserCheck className="absolute left-3.5 w-4 h-4 text-cyan-400/70 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Masukkan username admin"
-              value={loginUsername}
-              onChange={(e) => setLoginUsername(e.target.value)}
-              className="w-full bg-[#0d1d2b] border border-cyan-500/40 rounded-xl pl-10 py-3 text-xs text-cyan-100 placeholder-cyan-400/50 outline-none focus:border-cyan-400 transition"
-              autoFocus
-            />
+                {loginError && <p className="text-[11px] text-red-400 mt-2 text-center font-semibold">{loginError}</p>}
+
+                <button 
+                  type="submit" 
+                  className="w-full py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-extrabold text-xs tracking-wider rounded-xl transition uppercase shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+                >
+                  MASUK
+                </button>
+
+                {loginRole === 'pelanggan' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLoginModal(false);
+                      setLoginError('');
+                      setLoginUsername('');
+                      setLoginPassword('');
+                      setShowLoginPassword(false);
+                      setRegisterError('');
+                      setRegisterSuccess('');
+                      setShowRegisterModal(true);
+                    }}
+                    className="w-full py-2.5 border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/15 text-cyan-300 font-bold text-[10px] tracking-wider rounded-xl transition uppercase"
+                  >
+                    BELUM PUNYA AKUN? DAFTAR
+                  </button>
+                )}
+              </form>
+            </div>
           </div>
-        </div>
-
-        {/* Password */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-semibold uppercase tracking-wide text-cyan-200/70">
-            Password
-          </label>
-          <div className="relative flex items-center">
-            <Lock className="absolute left-3.5 w-4 h-4 text-cyan-400/70 pointer-events-none" />
-            <input
-              type={showLoginPassword ? 'text' : 'password'}
-              placeholder="Masukkan password admin"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              className="w-full bg-[#0d1d2b] border border-cyan-500/40 rounded-xl pl-10 pr-10 py-3 text-xs text-cyan-100 placeholder-cyan-400/50 outline-none focus:border-cyan-400 transition"
-            />
-            <button
-              type="button"
-              onClick={() => setShowLoginPassword(!showLoginPassword)}
-              className="absolute right-3.5 text-cyan-400/70 hover:text-cyan-300 transition"
-            >
-              {showLoginPassword ? <EyeOff className="w-4 h-4 text-cyan-400" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Pesan Error Login */}
-        {loginError && <p className="text-[11px] text-red-400 mt-2 text-center font-semibold">{loginError}</p>}
-
-        {/* Tombol Submit */}
-        <button 
-          type="submit" 
-          className="w-full py-3 bg-cyan-400 hover:bg-cyan-300 text-black font-extrabold text-xs tracking-wider rounded-xl transition uppercase shadow-[0_0_15px_rgba(34,211,238,0.4)] mt-2"
-        >
-          MASUK
-        </button>
-
-      </form>
-    </div>
-  </div>
-)}
+        )}
 
         {/* MODAL REGISTER PENGUNJUNG */}
         {showRegisterModal && (
