@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Lock, LogIn, EyeOff, Eye } from 'lucide-react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { Lock, EyeOff, Eye } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import Swal from 'sweetalert2';
 
@@ -19,12 +19,11 @@ export default function AdminLogin({ onLoginSuccess }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
 
   // ✅ Convert username jadi email format untuk Firebase
   const usernameToEmail = (un) => `${un}@hggarage.com`;
 
-  // ✅ Handle Login - Credentials HANYA dikirim ke Firebase
+  // ✅ Handle Login
   const handleLogin = async (e) => {
     e.preventDefault();
     
@@ -35,17 +34,10 @@ export default function AdminLogin({ onLoginSuccess }) {
 
     setLoading(true);
     try {
-      // Convert username ke email format untuk Firebase
       const email = usernameToEmail(username);
-      
-      // Kirim credentials ke Firebase - Firebase handle semua keamanan
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
-      // ✅ Credentials TIDAK disimpan di frontend
-      // Hanya token yang disimpan Firebase secara internal
       ThemeSwal.fire('Sukses!', 'Login berhasil! Selamat datang Admin.', 'success');
-      
-      // Panggil callback dengan user data
       onLoginSuccess(userCredential.user);
       
     } catch (error) {
@@ -66,59 +58,11 @@ export default function AdminLogin({ onLoginSuccess }) {
     }
   };
 
-  // ✅ Handle Register - Password di-hash oleh Firebase
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    
-    if (!username || !password) {
-      ThemeSwal.fire('Error', 'Username dan password harus diisi!', 'error');
-      return;
-    }
-
-    if (password.length < 6) {
-      ThemeSwal.fire('Error', 'Password minimal 6 karakter!', 'error');
-      return;
-    }
-
-    if (!username.match(/^[a-zA-Z0-9_]+$/)) {
-      ThemeSwal.fire('Error', 'Username hanya boleh huruf, angka, dan underscore!', 'error');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Convert username ke email format untuk Firebase
-      const email = usernameToEmail(username);
-      
-      // Firebase akan hash password otomatis
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      ThemeSwal.fire('Sukses!', 'Akun admin berhasil dibuat! Silakan login.', 'success');
-      setIsRegistering(false);
-      setUsername('');
-      setPassword('');
-      
-    } catch (error) {
-      console.error('Register error:', error);
-      
-      let errorMessage = 'Registrasi gagal. Coba lagi!';
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'Username sudah terdaftar';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Password terlalu lemah';
-      }
-      
-      ThemeSwal.fire('Registrasi Gagal', errorMessage, 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#080c14] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Card Login */}
         <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-6 sm:p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
+          
           {/* Header */}
           <div className="flex items-center justify-center mb-6 pt-1">
             <div className="w-16 h-16 rounded-full bg-[#0a2332] border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_25px_rgba(34,211,238,0.5)]">
@@ -130,11 +74,12 @@ export default function AdminLogin({ onLoginSuccess }) {
             HG GARAGE
           </h1>
           <p className="text-cyan-200/70 text-center mb-6 text-[11px] italic font-medium">
-            {isRegistering ? 'Buat Akun Admin Baru' : 'Admin Portal Masuk'}
+            Admin Portal Masuk
           </p>
 
-          {/* Form */}
-          <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-4">
+          {/* Form Login (Tanpa Opsi Register) */}
+          <form onSubmit={handleLogin} className="space-y-4">
+            
             {/* Username */}
             <div className="space-y-2">
               <label className="text-[11px] font-semibold uppercase tracking-wide text-cyan-200/70">
@@ -144,12 +89,9 @@ export default function AdminLogin({ onLoginSuccess }) {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                placeholder="admin_bengkel"
+                placeholder="Masukkan username"
                 className="w-full px-3 py-3 bg-[#0d1d2b] border border-cyan-500/40 rounded-xl text-cyan-100 placeholder-cyan-400/50 text-xs focus:border-cyan-400 focus:outline-none transition"
               />
-              {isRegistering && (
-                <p className="text-xs text-gray-400 mt-1">💡 Username hanya huruf, angka, underscore</p>
-              )}
             </div>
 
             {/* Password */}
@@ -176,48 +118,15 @@ export default function AdminLogin({ onLoginSuccess }) {
               </div>
             </div>
 
-            <div className="text-[10px] text-cyan-200/70 bg-[#081b26] border border-cyan-500/20 rounded-lg px-3 py-2">
-              {isRegistering ? 'Password minimal 6 karakter' : 'Credential: admin / admin123'}
-            </div>
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-black font-extrabold text-xs tracking-wider rounded-xl transition uppercase shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+              className="w-full py-3 bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-black font-extrabold text-xs tracking-wider rounded-xl transition uppercase shadow-[0_0_15px_rgba(34,211,238,0.4)] mt-2"
             >
-              {loading ? 'Sedang memproses...' : isRegistering ? 'BUAT AKUN' : 'MASUK'}
+              {loading ? 'Sedang memproses...' : 'MASUK'}
             </button>
-
-            {!isRegistering && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsRegistering(true);
-                  setUsername('');
-                  setPassword('');
-                  setShowPassword(false);
-                }}
-                className="w-full py-2.5 border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/15 text-cyan-300 font-bold text-[10px] tracking-wider rounded-xl transition uppercase"
-              >
-                BELUM PUNYA AKUN? DAFTAR
-              </button>
-            )}
-
-            {isRegistering && (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsRegistering(false);
-                  setUsername('');
-                  setPassword('');
-                  setShowPassword(false);
-                }}
-                className="w-full py-2.5 border border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/15 text-cyan-300 font-bold text-[10px] tracking-wider rounded-xl transition uppercase"
-              >
-                SUDAH PUNYA AKUN? LOGIN
-              </button>
-            )}
           </form>
+
         </div>
       </div>
     </div>
