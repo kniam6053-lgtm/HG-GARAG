@@ -286,50 +286,63 @@ export default function AdminPanel({ user, onLogout }) {
 
             {/* Bookings List */}
             <div className="lg:col-span-2">
-              <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-8 max-h-[700px] overflow-y-auto shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
+              <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-8 max-h-[800px] overflow-y-auto shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
                 <h3 className="text-xl font-bold text-cyan-300 mb-6 tracking-wide">📋 Daftar Booking</h3>
                 
                 {bookings.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="text-5xl mb-4">📭</div>
-                    <p className="text-cyan-200/50">Belum ada booking</p>
-                    <p className="text-cyan-200/30 text-xs mt-2">Booking akan tampil di sini setelah pelanggan melakukan pemesanan</p>
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="text-6xl mb-4">📭</div>
+                    <p className="text-cyan-200/60 text-lg font-semibold">Belum ada booking</p>
+                    <p className="text-cyan-200/40 text-sm mt-2">Booking akan tampil di sini setelah pelanggan melakukan pemesanan</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {bookings.map((booking) => (
-                      <div key={booking.id} className="bg-[#0d1d2b] p-5 rounded-xl border border-cyan-500/20 hover:border-cyan-500/60 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition duration-200">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1">
-                            <p className="font-bold text-cyan-100 text-lg">{booking.customerName}</p>
-                            <p className="text-cyan-400/70 text-sm">📱 {booking.phone}</p>
+                      <div key={booking.id} className="bg-gradient-to-br from-[#0d1d2b] to-[#0a1820] p-6 rounded-xl border border-cyan-500/30 hover:border-cyan-500/80 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] transition duration-200 group">
+                        <div className="flex justify-between items-start gap-4 mb-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-cyan-100 text-lg truncate">{booking.customerName}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-cyan-400/60 text-xs">📞</span>
+                              <p className="text-cyan-300/80 text-sm font-mono">{booking.phone}</p>
+                            </div>
                           </div>
                           <button
                             onClick={() => handleDeleteBooking(booking.id)}
-                            className="p-2 hover:bg-red-500/20 text-red-400/70 hover:text-red-400 rounded-lg transition"
+                            className="p-2.5 hover:bg-red-500/25 text-red-400/60 hover:text-red-300 rounded-lg transition flex-shrink-0"
                             title="Hapus booking"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={20} />
                           </button>
                         </div>
-                        <div className="space-y-2 pt-3 border-t border-cyan-500/10">
-                          <div className="flex items-center gap-2 text-cyan-200">
-                            <Wrench size={16} className="text-cyan-400/60" />
-                            <span className="text-sm"><span className="font-semibold">Service:</span> {booking.service}</span>
+                        
+                        <div className="space-y-3 py-4 border-y border-cyan-500/10">
+                          <div className="flex items-start gap-3">
+                            <Wrench size={16} className="text-cyan-400/70 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-cyan-200/60 uppercase tracking-wide">Service</p>
+                              <p className="text-cyan-100 font-semibold">{booking.service}</p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 text-cyan-200">
-                            <Calendar size={16} className="text-cyan-400/60" />
-                            <span className="text-sm"><span className="font-semibold">Tanggal:</span> {booking.date} {booking.time && `- ${booking.time}`}</span>
+                          
+                          <div className="flex items-start gap-3">
+                            <Calendar size={16} className="text-cyan-400/70 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-cyan-200/60 uppercase tracking-wide">Jadwal</p>
+                              <p className="text-cyan-100 font-semibold">{booking.date} {booking.time && `- ${booking.time}`}</p>
+                            </div>
                           </div>
                         </div>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className={`inline-block text-xs px-4 py-1.5 rounded-full font-semibold ${
+
+                        <div className="mt-4 flex items-center justify-between">
+                          <span className={`inline-block text-xs px-4 py-2 rounded-full font-bold tracking-wide ${
                             booking.status === 'Completed' 
-                              ? 'bg-green-500/25 text-green-400 border border-green-500/30'
-                              : 'bg-yellow-500/25 text-yellow-400 border border-yellow-500/30'
+                              ? 'bg-green-500/30 text-green-300 border border-green-500/40'
+                              : 'bg-yellow-500/30 text-yellow-300 border border-yellow-500/40'
                           }`}>
-                            {booking.status === 'Completed' ? '✓ Selesai' : '⏳ Pending'}
+                            {booking.status === 'Completed' ? '✓ SELESAI' : '⏳ PENDING'}
                           </span>
+                          <span className="text-xs text-cyan-400/50 font-mono">ID: {booking.id.slice(0, 8)}</span>
                         </div>
                       </div>
                     ))}
@@ -407,40 +420,52 @@ export default function AdminPanel({ user, onLogout }) {
 
             {/* Parts List */}
             <div className="lg:col-span-2">
-              <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-8 max-h-[700px] overflow-y-auto shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
+              <div className="bg-[#0b141d]/95 border border-cyan-500/40 rounded-2xl p-8 max-h-[800px] overflow-y-auto shadow-[0_0_50px_rgba(6,182,212,0.2)] backdrop-blur-sm">
                 <h3 className="text-xl font-bold text-cyan-300 mb-6 tracking-wide">🔧 Daftar Parts</h3>
                 
                 {parts.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="text-5xl mb-4">📦</div>
-                    <p className="text-cyan-200/50">Belum ada parts</p>
-                    <p className="text-cyan-200/30 text-xs mt-2">Tambahkan part untuk menampilkan katalog sparepart</p>
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="text-6xl mb-4">📦</div>
+                    <p className="text-cyan-200/60 text-lg font-semibold">Belum ada parts</p>
+                    <p className="text-cyan-200/40 text-sm mt-2">Tambahkan part untuk menampilkan katalog sparepart</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {parts.map((part) => (
-                      <div key={part.id} className="bg-[#0d1d2b] p-5 rounded-xl border border-cyan-500/20 hover:border-cyan-500/60 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition duration-200">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1">
-                            <p className="font-bold text-cyan-100 text-lg">{part.partName}</p>
-                            <p className="text-cyan-400/70 text-sm">📂 {part.category}</p>
+                      <div key={part.id} className="bg-gradient-to-br from-[#0d1d2b] to-[#0a1820] p-6 rounded-xl border border-cyan-500/30 hover:border-cyan-500/80 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] transition duration-200 group">
+                        <div className="flex justify-between items-start gap-4 mb-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-cyan-100 text-lg truncate">{part.partName}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-cyan-400/60 text-xs">📂</span>
+                              <p className="text-cyan-300/80 text-sm">{part.category}</p>
+                            </div>
                           </div>
                           <button
                             onClick={() => handleDeletePart(part.id)}
-                            className="p-2 hover:bg-red-500/20 text-red-400/70 hover:text-red-400 rounded-lg transition"
+                            className="p-2.5 hover:bg-red-500/25 text-red-400/60 hover:text-red-300 rounded-lg transition flex-shrink-0"
                             title="Hapus part"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={20} />
                           </button>
                         </div>
-                        <div className="flex items-center justify-between pt-3 border-t border-cyan-500/10">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-cyan-200/70">Harga:</span>
-                            <p className="text-lg font-bold text-cyan-300">Rp {part.price?.toLocaleString('id-ID') || 0}</p>
+
+                        <div className="grid grid-cols-2 gap-4 py-4 border-y border-cyan-500/10">
+                          <div>
+                            <p className="text-xs text-cyan-200/60 uppercase tracking-wide mb-1">Harga</p>
+                            <p className="text-xl font-bold text-cyan-300">Rp {part.price?.toLocaleString('id-ID') || 0}</p>
                           </div>
-                          <span className="text-xs bg-blue-500/25 text-blue-400 px-4 py-1.5 rounded-full font-semibold border border-blue-500/30">
-                            📊 Stock: {part.stock}
+                          <div className="text-right">
+                            <p className="text-xs text-cyan-200/60 uppercase tracking-wide mb-1">Stok</p>
+                            <p className="text-xl font-bold text-cyan-300">{part.stock} unit</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4">
+                          <span className="inline-block text-xs px-4 py-2 rounded-full bg-blue-500/30 text-blue-300 border border-blue-500/40 font-bold tracking-wide">
+                            ✓ TERSEDIA
                           </span>
+                          <span className="ml-2 text-xs text-cyan-400/50 font-mono">ID: {part.id.slice(0, 8)}</span>
                         </div>
                       </div>
                     ))}
